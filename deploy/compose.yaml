@@ -1,0 +1,7 @@
+services:
+  systeme-solaire:
+    image: ghcr.io/pierreba49/systeme-solaire:latest
+    container_name: systeme-solaire
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8090}:80"

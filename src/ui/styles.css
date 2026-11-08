@@ -1,0 +1,773 @@
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: #000;
+  color: #fff;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  overflow: hidden;
+}
+
+canvas#scene {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.rotate-screen {
+  display: none;
+}
+
+@media (orientation: portrait) {
+  .rotate-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    font-size: 2rem;
+    text-align: center;
+    padding: 2rem;
+  }
+}
+
+.time-control {
+  position: fixed;
+  left: 50%;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: rgba(10, 12, 24, 0.75);
+  color: #fff;
+}
+
+.time-control__date {
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.time-control__buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.time-control__buttons button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.time-control__buttons button.active {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+  font-weight: 600;
+}
+
+.chapter-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.chapter-title {
+  position: absolute;
+  top: calc(16px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.fade {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease;
+}
+
+.fade.fade--on {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.menu-toggle,
+.menu-item,
+.menu-quality button,
+.sources-panel__close {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(10, 12, 24, 0.75);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  box-sizing: border-box;
+}
+
+.menu-toggle {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  left: calc(12px + env(safe-area-inset-left, 0px));
+  z-index: 70;
+}
+
+.menu-panel {
+  position: fixed;
+  top: calc(64px + env(safe-area-inset-top, 0px));
+  left: calc(12px + env(safe-area-inset-left, 0px));
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(10, 12, 24, 0.9);
+}
+
+.menu-panel[hidden],
+.sources-panel[hidden] {
+  display: none;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.menu-item[aria-current='page'],
+.menu-quality button[aria-pressed='true'] {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+  font-weight: 600;
+}
+
+.menu-quality {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.menu-quality span {
+  margin-right: 4px;
+}
+
+.sources-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  padding: calc(72px + env(safe-area-inset-top, 0px)) calc(24px + env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) calc(24px + env(safe-area-inset-left, 0px));
+  background: rgba(0, 0, 0, 0.92);
+  overflow: auto;
+}
+
+.sources-panel__close {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  right: calc(12px + env(safe-area-inset-right, 0px));
+}
+
+.time-control,
+.scale-toggle {
+  pointer-events: auto;
+}
+
+.scale-badge {
+  position: absolute;
+  top: calc(16px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 60vw;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgba(10, 12, 24, 0.75);
+  font-size: 1rem;
+  text-align: center;
+}
+
+.scale-toggle {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  right: calc(12px + env(safe-area-inset-right, 0px));
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(10, 12, 24, 0.75);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.body-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 12px 0 0;
+  border: 0;
+  background: none;
+  color: #fff;
+  font: inherit;
+  font-size: 0.95rem;
+  text-shadow: 0 0 4px #000, 0 0 2px #000;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.body-label[hidden] {
+  display: none;
+}
+
+.body-label__target {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+}
+
+.body-label__dot {
+  display: block;
+  border-radius: 50%;
+  background: #ffd36b;
+  box-shadow: 0 0 6px rgba(255, 211, 107, 0.9);
+}
+
+.body-label__dot--hidden {
+  opacity: 0;
+}
+
+/* Les touchers sur les planètes sont résolus par le chapitre (planète la plus proche), pas par les étiquettes. */
+.body-label,
+.body-label * {
+  pointer-events: none;
+}
+
+.body-label--name-hidden .body-label__name {
+  visibility: hidden;
+}
+
+.sources h2 {
+  margin: 0 0 8px;
+  font-size: 1.4rem;
+}
+
+.sources h3 {
+  margin: 24px 0 8px;
+  font-size: 1.1rem;
+}
+
+.sources ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sources li {
+  margin: 0 0 14px;
+}
+
+.sources a {
+  color: #9fd0ff;
+  word-break: break-all;
+}
+
+.sources p,
+.sources dd {
+  margin: 4px 0;
+  max-width: 70ch;
+}
+
+.sources__meta {
+  opacity: 0.75;
+  font-size: 0.9rem;
+}
+
+/* --- Chapitre Planète --- */
+.fiche,
+.presenter-notes__toggle,
+.presenter-notes__panel,
+.body-strip {
+  pointer-events: auto;
+}
+
+.fiche {
+  position: absolute;
+  top: calc(64px + env(safe-area-inset-top, 0px));
+  right: calc(12px + env(safe-area-inset-right, 0px));
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  width: 340px;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  overflow-y: auto;
+  border-radius: 14px;
+  background: rgba(10, 12, 24, 0.75);
+}
+
+.fiche__titre {
+  margin: 0 0 10px;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.fiche__chiffre {
+  margin: 0 0 12px;
+}
+
+.fiche__libelle {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.fiche__valeur {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.fiche__comparaison {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.presenter-notes__toggle {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  right: calc(12px + env(safe-area-inset-right, 0px));
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(10, 12, 24, 0.75);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.presenter-notes__toggle[aria-expanded='true'] {
+  background: rgba(60, 90, 160, 0.85);
+}
+
+.presenter-notes__panel {
+  position: absolute;
+  left: calc(12px + env(safe-area-inset-left, 0px));
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  width: 360px;
+  max-height: 55vh;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  overflow-y: auto;
+  border-radius: 14px;
+  background: rgba(10, 12, 24, 0.9);
+  font-size: 0.95rem;
+}
+
+.presenter-notes__panel[hidden] {
+  display: none;
+}
+
+.presenter-notes__panel h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.presenter-notes__panel ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.presenter-notes__panel li {
+  margin: 0 0 8px;
+}
+
+.body-strip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 14px;
+  background: rgba(10, 12, 24, 0.75);
+}
+
+.body-strip button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: none;
+  color: #fff;
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.body-strip button[aria-current='true'] {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(60, 90, 160, 0.85);
+}
+
+.moon-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  text-shadow: 0 0 4px #000, 0 0 2px #000;
+}
+
+.moon-label[hidden] {
+  display: none;
+}
+
+/* --- Chapitre La Lune --- */
+.moon-ui {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.moon-top-hit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.moon-top-labels {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.moon-top-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 0 4px #000;
+  white-space: nowrap;
+}
+
+.moon-top-label--sun {
+  width: 150px;
+  margin-left: -75px;
+  white-space: normal;
+  text-align: center;
+  color: #ffd25e;
+}
+
+.moon-top-label--loupe {
+  margin-left: -20px;
+  margin-top: -9px;
+}
+
+.moon-top-label--sun-name {
+  color: #ffd25e;
+}
+
+.moon-loupe-frame {
+  position: absolute;
+  left: calc(12px + env(safe-area-inset-left, 0px));
+  top: calc(56px + env(safe-area-inset-top, 0px));
+  width: 200px;
+  height: 200px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 14px;
+}
+
+.moon-loupe-caption {
+  position: absolute;
+  left: calc(12px + env(safe-area-inset-left, 0px));
+  top: calc(262px + env(safe-area-inset-top, 0px));
+  max-width: 200px;
+  font-size: 0.8rem;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 0 4px #000;
+}
+
+.moon-divider {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.moon-title {
+  position: absolute;
+  top: calc(18px + env(safe-area-inset-top, 0px));
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-shadow: 0 0 6px #000;
+}
+
+.moon-title--top {
+  left: calc(100px + env(safe-area-inset-left, 0px));
+}
+
+.moon-title--sky {
+  left: calc(50% + 14px);
+}
+
+.moon-card {
+  position: absolute;
+  top: calc(56px + env(safe-area-inset-top, 0px));
+  left: calc(50% + 14px);
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(10, 12, 24, 0.75);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.moon-card__below {
+  color: #ffd25e;
+}
+
+.moon-card__below[hidden] {
+  display: none;
+}
+
+.moon-bar {
+  position: absolute;
+  left: 50%;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  background: rgba(10, 12, 24, 0.82);
+  pointer-events: auto;
+}
+
+.moon-bar__readout {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.moon-phase {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.moon-date {
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.moon-bar__controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.moon-slider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.moon-slider input {
+  width: 170px;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+.moon-slider__value {
+  min-width: 4.2em;
+  font-variant-numeric: tabular-nums;
+}
+
+.moon-bar button,
+.moon-tools button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+.moon-bar button:disabled,
+.moon-tools button:disabled {
+  opacity: 0.5;
+}
+
+.moon-status {
+  min-height: 1.2em;
+  font-size: 0.9rem;
+  color: #ffd25e;
+}
+
+.moon-status:empty {
+  display: none;
+}
+
+.moon-ui .presenter-notes__panel {
+  bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+}
+
+.moon-sun-hint {
+  position: absolute;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: rgba(10, 12, 24, 0.75);
+  color: #ffd25e;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.moon-sun-hint[hidden] {
+  display: none;
+}
+
+.moon-sun-hint--right {
+  right: calc(12px + env(safe-area-inset-right, 0px));
+}
+
+.moon-sun-hint--left {
+  left: calc(50% + 12px);
+}
+
+.moon-top-label--inclination {
+  margin-left: 8px;
+  margin-top: -9px;
+  color: #ffd25e;
+  font-weight: 600;
+}
+
+.moon-tools {
+  position: absolute;
+  left: calc(12px + env(safe-area-inset-left, 0px));
+  top: calc(306px + env(safe-area-inset-top, 0px));
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.moon-tools button {
+  background: rgba(10, 12, 24, 0.7);
+  white-space: normal;
+  text-align: left;
+  line-height: 1.2;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.moon-tools button[aria-pressed='true'] {
+  border-color: #ffd21e;
+  background: rgba(90, 70, 10, 0.85);
+}
+
+.moon-tools button[hidden] {
+  display: none;
+}
+
+.moon-tools__eclipse {
+  min-height: 0;
+  font-size: 0.9rem;
+  line-height: 1.25;
+  color: #ffd25e;
+  text-shadow: 0 0 4px #000;
+}
+
+.moon-tools__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 0 10px;
+  border-radius: 10px;
+  background: rgba(10, 12, 24, 0.7);
+  font-size: 0.95rem;
+}
+
+.moon-tools__toggle input {
+  width: 22px;
+  height: 22px;
+  accent-color: #ffd21e;
+}
+
+.chapter-error {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: #000;
+  font-size: 1.3rem;
+}
+
+.chapter-error[hidden] {
+  display: none;
+}
+
+.chapter-error button {
+  min-width: 160px;
+  min-height: 48px;
+  pointer-events: auto;
+}
